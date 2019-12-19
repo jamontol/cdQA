@@ -1181,13 +1181,27 @@ class BertQA(BaseEstimator):
         self.server_port = server_port
 
         # Prepare model
-        self.model = BertForQuestionAnswering.from_pretrained(
-            self.bert_model,
-            cache_dir=os.path.join(
-                str(PYTORCH_PRETRAINED_BERT_CACHE),
-                "distributed_{}".format(self.local_rank),
-            ),
-        )
+
+        if (self.bert_model == 'bert-base-multilingual-cased'):
+
+            self.model = BertForQuestionAnswering.from_pretrained(
+                self.bert_model,
+                cache_dir=os.path.join(
+                    str(PYTORCH_PRETRAINED_BERT_CACHE),
+                    "distributed_{}".format(self.local_rank),
+                ),
+            )
+
+        elif (self.bert_model == 'distilbert-base-multilingual-cased'):
+
+            self.model = DistilBertForQuestionAnswering.from_pretrained(
+                self.bert_model,
+                cache_dir=os.path.join(
+                    str(PYTORCH_PRETRAINED_BERT_CACHE),
+                    "distributed_{}".format(self.local_rank),
+                ),
+            )
+
 
         if self.server_ip and self.server_port:
             # Distant debugging - see https://code.visualstudio.com/docs/python/debugging#_attach-to-a-local-script
