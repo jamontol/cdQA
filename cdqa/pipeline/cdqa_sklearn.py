@@ -7,11 +7,11 @@ import torch
 
 from sklearn.base import BaseEstimator
 
-from cdqa.retriever import TfidfRetriever, BM25Retriever
+from cdqa.retriever import TfidfRetriever, BM25Retriever, LSARetriever
 from cdqa.utils.converters import generate_squad_examples
 from cdqa.reader import BertProcessor, BertQA
 
-RETRIEVERS = {"bm25": BM25Retriever, "tfidf": TfidfRetriever}
+RETRIEVERS = {"bm25": BM25Retriever, "tfidf": TfidfRetriever, "tfidf_LSA": LSARetriever}
 
 
 class QAPipeline(BaseEstimator):
