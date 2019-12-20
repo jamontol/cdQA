@@ -1013,8 +1013,9 @@ class BertProcessor(BaseEstimator, TransformerMixin):
 
         if tokenizer is None:
             self.tokenizer = BertTokenizer.from_pretrained(
-                self.bert_model, do_lower_case=self.do_lower_case
-            )
+                self.bert_model, do_lower_case=self.do_lower_case)
+        elif tokenizer is 'distilBERT':
+            self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
         else:
             self.tokenizer = tokenizer
             logger.info("loading custom tokenizer")
