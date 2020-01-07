@@ -343,7 +343,7 @@ class LSARetriever(BaseRetriever):
     # We should also try lancaster lemmatizer since it is a more aggresive
     # stemming and word-level tfidf could benefit more from it
     stemmer = SnowballStemmer('spanish')
-    stopwords = stopwords.words('spanish')
+    stop_words = stopwords.words('spanish')
   
     def __init__(self, top_n=3, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=0):
 
@@ -379,7 +379,7 @@ class LSARetriever(BaseRetriever):
     def process_txt(self, txt, stem=False):
         
         txt = txt.lower()
-        txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in stopwords])
+        txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in stop_words])
         txt = re.sub('[^\w\s]+', '', txt)
         txt = re.sub('\s+', ' ', txt).strip()
         if (stem):
