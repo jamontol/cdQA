@@ -7,7 +7,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.base import BaseEstimator
 from .vectorizers import BM25Vectorizer
+
 import nltk
+from nltk.corpus import stopwords
+from nltk import SnowballStemmer
 
 
 
