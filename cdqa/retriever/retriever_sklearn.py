@@ -364,7 +364,7 @@ class LSARetriever(BaseEstimator):
         self.cum_evr = self.tsvd.explained_variance_ratio_.cumsum()[-1]
         
         if (self.verbose):
-        print('Cumevr:', self.cum_evr)
+            print('Cumevr:', self.cum_evr)
         return self
   
     def _compute_scores(self, x_i, metadata):
