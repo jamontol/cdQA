@@ -358,7 +358,7 @@ class LSARetriever(BaseRetriever):
         self.tsvd = TruncatedSVD(n_components=n_components)
     
     def _fit_vectorizer(self, X, y=None):
-        self.anss = [process_txt(a, stem=self.do_stem) for a in X] # stored in self just in case
+        self.anss = [self.process_txt(a, stem=self.do_stem) for a in X] # stored in self just in case
         self.anss_tfidf = self.tfidf.fit_transform(self.anss) # stored in self just in case
         self.anss_tfidf_tsvd = self.tsvd.fit_transform(self.anss_tfidf)
         self.cum_evr = self.tsvd.explained_variance_ratio_.cumsum()[-1]
