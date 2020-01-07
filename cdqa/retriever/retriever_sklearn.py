@@ -336,7 +336,7 @@ class BM25Retriever(BaseRetriever):
         return scores
 
 
-class LSARetriever(BaseEstimator):
+class LSARetriever(BaseRetriever):
 
     nltk.download('stopwords')
     nltk.download('punkt')
