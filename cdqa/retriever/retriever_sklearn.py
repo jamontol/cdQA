@@ -342,10 +342,11 @@ class LSARetriever(BaseRetriever):
     nltk.download('punkt')
     # We should also try lancaster lemmatizer since it is a more aggresive
     # stemming and word-level tfidf could benefit more from it
-    stemmer = SnowballStemmer('spanish')
-    stop_words = stopwords.words('spanish')
   
     def __init__(self, top_n=3, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=0):
+
+        self.stemmer = SnowballStemmer('spanish')
+        self.stopwords = stopwords.words('spanish')
 
         self.top_n = top_n
         self.analyzer = analyzer
@@ -379,11 +380,11 @@ class LSARetriever(BaseRetriever):
     def process_txt(self, txt, stem=False):
         
         txt = txt.lower()
-        txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in stop_words])
+        txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in self.stopwords])
         txt = re.sub('[^\w\s]+', '', txt)
         txt = re.sub('\s+', ' ', txt).strip()
         if (stem):
-            txt = ' '.join([stemmer.stem(w) for w in nltk.word_tokenize(txt)])
+            txt = ' '.join([self.stemmer.stem(w) for w in nltk.word_tokenize(txt)])
         return txt
 
     def _show_last_q_res(self):
