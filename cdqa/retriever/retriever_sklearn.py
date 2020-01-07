@@ -334,8 +334,6 @@ class BM25Retriever(BaseRetriever):
 
 
 class LSARetriever(BaseEstimator):
-  
-  def __init__(self, top_n=3, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=0):
 
     nltk.download('stopwords')
     nltk.download('punkt')
@@ -343,46 +341,48 @@ class LSARetriever(BaseEstimator):
     # stemming and word-level tfidf could benefit more from it
     stemmer = SnowballStemmer('spanish')
     stopwords = stopwords.words('spanish')
-
-    self.top_n = top_n
-    self.analyzer = analyzer
-    self.ngram_range = ngram_range
-    self.n_components = n_components
-    self.do_stem = do_stem
-    self.verbose = verbose
-    
-    self.tfidf = TfidfVectorizer(analyzer=analyzer, ngram_range=ngram_range)
-    self.tsvd = TruncatedSVD(n_components=n_components)
-    
-  def _fit_vectorizer(self, X, y=None):
-    self.anss = [process_txt(a, stem=self.do_stem) for a in X] # stored in self just in case
-    self.anss_tfidf = self.tfidf.fit_transform(self.anss) # stored in self just in case
-    self.anss_tfidf_tsvd = self.tsvd.fit_transform(self.anss_tfidf)
-    self.cum_evr = self.tsvd.explained_variance_ratio_.cumsum()[-1]
-    
-    if (self.verbose):
-      print('Cumevr:', self.cum_evr)
-    return self
   
-  def _compute_scores(self, x_i, metadata):
-    x_i_tfidf_tsvd = self.tsvd.transform(self.tfidf.transform([self.process_txt(x_i, stem=self.do_stem)]))
-    cos_sims = [1 / (1 + cos_dist_i) if not math.isnan(cos_dist_i) else 0 for cos_dist_i in [cosine(x_i_tfidf_tsvd, a_i) for a_i in self.anss_tfidf_tsvd]]
-    #tup_i_cos_sims = list(enumerate(cos_sims))
-    #self.sorted_tup_i_cos_sims = sorted(tup_i_cos_sims, reverse=True, key=lambda x: x[1])
-    #sorted_indices_by_cos_sim = [idx for (idx, cos_sim_i) in self.sorted_tup_i_cos_sims]
-    #return np.array(sorted_indices_by_cos_sim[:self.top_n])
-    return cos_sims
-    
-  def process_txt(self, txt, stem=False):
-    
-    txt = txt.lower()
-    txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in stopwords])
-    txt = re.sub('[^\w\s]+', '', txt)
-    txt = re.sub('\s+', ' ', txt).strip()
-    if (stem):
-        txt = ' '.join([stemmer.stem(w) for w in nltk.word_tokenize(txt)])
-    return txt
+    def __init__(self, top_n=3, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=0):
 
-  def _show_last_q_res(self):
-    print(self.sorted_tup_i_cos_sims)
+        self.top_n = top_n
+        self.analyzer = analyzer
+        self.ngram_range = ngram_range
+        self.n_components = n_components
+        self.do_stem = do_stem
+        self.verbose = verbose
+        
+        self.tfidf = TfidfVectorizer(analyzer=analyzer, ngram_range=ngram_range)
+        self.tsvd = TruncatedSVD(n_components=n_components)
+    
+    def _fit_vectorizer(self, X, y=None):
+        self.anss = [process_txt(a, stem=self.do_stem) for a in X] # stored in self just in case
+        self.anss_tfidf = self.tfidf.fit_transform(self.anss) # stored in self just in case
+        self.anss_tfidf_tsvd = self.tsvd.fit_transform(self.anss_tfidf)
+        self.cum_evr = self.tsvd.explained_variance_ratio_.cumsum()[-1]
+        
+        if (self.verbose):
+        print('Cumevr:', self.cum_evr)
+        return self
+  
+    def _compute_scores(self, x_i, metadata):
+        x_i_tfidf_tsvd = self.tsvd.transform(self.tfidf.transform([self.process_txt(x_i, stem=self.do_stem)]))
+        cos_sims = [1 / (1 + cos_dist_i) if not math.isnan(cos_dist_i) else 0 for cos_dist_i in [cosine(x_i_tfidf_tsvd, a_i) for a_i in self.anss_tfidf_tsvd]]
+        #tup_i_cos_sims = list(enumerate(cos_sims))
+        #self.sorted_tup_i_cos_sims = sorted(tup_i_cos_sims, reverse=True, key=lambda x: x[1])
+        #sorted_indices_by_cos_sim = [idx for (idx, cos_sim_i) in self.sorted_tup_i_cos_sims]
+        #return np.array(sorted_indices_by_cos_sim[:self.top_n])
+        return cos_sims
+    
+    def process_txt(self, txt, stem=False):
+        
+        txt = txt.lower()
+        txt = ' '.join([w for w in nltk.word_tokenize(txt) if w not in stopwords])
+        txt = re.sub('[^\w\s]+', '', txt)
+        txt = re.sub('\s+', ' ', txt).strip()
+        if (stem):
+            txt = ' '.join([stemmer.stem(w) for w in nltk.word_tokenize(txt)])
+        return txt
+
+    def _show_last_q_res(self):
+        print(self.sorted_tup_i_cos_sims)
 
