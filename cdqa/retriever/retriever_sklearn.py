@@ -11,7 +11,7 @@ from .vectorizers import BM25Vectorizer
 import nltk
 from nltk.corpus import stopwords
 from nltk import SnowballStemmer
-
+import re
 
 
 class BaseRetriever(BaseEstimator, ABC):
