@@ -8,11 +8,12 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.base import BaseEstimator
 from .vectorizers import BM25Vectorizer
 
+import re
+import math
 import nltk
 from nltk.corpus import stopwords
 from nltk import SnowballStemmer
-import re
-
+from scipy.spatial.distance import cosine
 
 class BaseRetriever(BaseEstimator, ABC):
     """
@@ -162,7 +163,7 @@ class TfidfRetriever(BaseRetriever):
         lowercase=True,
         preprocessor=None,
         tokenizer=None,
-        stop_words="english",
+        stop_words=None,
         token_pattern=r"(?u)\b\w\w+\b",
         ngram_range=(1, 2),
         max_df=0.85,
@@ -284,7 +285,7 @@ class BM25Retriever(BaseRetriever):
         lowercase=True,
         preprocessor=None,
         tokenizer=None,
-        stop_words="english",
+        stop_words=None,
         token_pattern=r"(?u)\b\w\w+\b",
         ngram_range=(1, 2),
         max_df=0.85,
@@ -355,12 +356,14 @@ class LSARetriever(BaseRetriever):
         self.do_stem = do_stem
         self.verbose = verbose
         
-        self.tfidf = TfidfVectorizer(analyzer=analyzer, ngram_range=ngram_range)
+        vectorizer = TfidfVectorizer(analyzer=analyzer, ngram_range=ngram_range)
         self.tsvd = TruncatedSVD(n_components=n_components)
+
+        super().__init__(vectorizer, top_n, verbose)
     
-    def _fit_vectorizer(self, X, y=None):
-        self.anss = [self.process_txt(a, stem=self.do_stem) for a in X] # stored in self just in case
-        self.anss_tfidf = self.tfidf.fit_transform(self.anss) # stored in self just in case
+    def _fit_vectorizer(self, df, y=None):
+        self.anss = [self.process_txt(a, stem=self.do_stem) for a in df["content"]] # stored in self just in case
+        self.anss_tfidf = self.vectorizer.fit_transform(self.anss) # stored in self just in case
         self.anss_tfidf_tsvd = self.tsvd.fit_transform(self.anss_tfidf)
         self.cum_evr = self.tsvd.explained_variance_ratio_.cumsum()[-1]
         
@@ -368,8 +371,8 @@ class LSARetriever(BaseRetriever):
             print('Cumevr:', self.cum_evr)
         return self
   
-    def _compute_scores(self, x_i, metadata):
-        x_i_tfidf_tsvd = self.tsvd.transform(self.tfidf.transform([self.process_txt(x_i, stem=self.do_stem)]))
+    def _compute_scores(self, query):
+        x_i_tfidf_tsvd = self.tsvd.transform(self.vectorizer.transform([self.process_txt(query, stem=self.do_stem)]))
         cos_sims = [1 / (1 + cos_dist_i) if not math.isnan(cos_dist_i) else 0 for cos_dist_i in [cosine(x_i_tfidf_tsvd, a_i) for a_i in self.anss_tfidf_tsvd]]
         #tup_i_cos_sims = list(enumerate(cos_sims))
         #self.sorted_tup_i_cos_sims = sorted(tup_i_cos_sims, reverse=True, key=lambda x: x[1])
