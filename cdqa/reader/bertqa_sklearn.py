@@ -1482,7 +1482,7 @@ class BertQA(BaseEstimator):
                 if 'distilbert' not in self.bert_model:
                     inputs['token_type_ids'] = batch[2]
                 example_indices = batch[3]
-                batch_start_logits, batch_end_logits, otro = self.model(**inputs)
+                batch_start_logits, batch_end_logits = self.model(**inputs)
 
             for i, example_index in enumerate(example_indices):
                 start_logits = batch_start_logits[i].detach().cpu().tolist()
