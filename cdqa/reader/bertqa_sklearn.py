@@ -28,6 +28,7 @@ from io import open
 import uuid
 
 import numpy as np
+from scipy.stats import entropy
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
 from torch.utils.data.distributed import DistributedSampler
@@ -719,6 +720,7 @@ def write_predictions(
                     best_non_null_entry = entry
 
         probs = _compute_softmax(total_scores)
+        entropia = entropy(probs) #ADD
 
         nbest_json = []
         for (i, entry) in enumerate(nbest):
@@ -747,6 +749,8 @@ def write_predictions(
                 all_predictions[example.qas_id] = best_non_null_entry.text
                 all_nbest_json[example.qas_id] = nbest_json
 
+        #final_entropies[example.qas_id] = entropia #ADD
+
         best_dict = nbest_json[0]
         best_dict["qas_id"] = example.qas_id
         best_dict["title"] = example.title
@@ -755,6 +759,7 @@ def write_predictions(
         best_dict["final_score"] = (1 - retriever_score_weight) * (
             best_dict["start_logit"] + best_dict["end_logit"]
         ) + retriever_score_weight * best_dict["retriever_score"]
+        best_dict["entropy"] = entropia
         final_predictions.append(best_dict)
 
     final_predictions_sorted = sorted(
@@ -766,6 +771,7 @@ def write_predictions(
         final_predictions_sorted[0]["title"],
         final_predictions_sorted[0]["paragraph"],
         final_predictions_sorted[0]["final_score"],
+        final_predictions_sorted[0]["entropy"]
     )
 
     return_list = [best_prediction, final_predictions_sorted]
@@ -931,6 +937,7 @@ def _n_best_predictions(final_predictions_sorted, n):
             final_predictions_sorted[i]["title"],
             final_predictions_sorted[i]["paragraph"],
             final_predictions_sorted[i]["final_score"],
+            final_predictions_sorted[i]["entropy"],
         )
         final_prediction_list.append(curr_pred)
     return final_prediction_list
