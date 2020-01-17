@@ -174,7 +174,7 @@ class QAPipeline(BaseEstimator):
             isinstance(n_predictions, int) or n_predictions is None or n_predictions < 1
         ):
             raise TypeError("n_predictions should be a positive Integer or None")
-        best_idx_scores = self.retriever.predict(query)
+        best_idx_scores= self.retriever.predict(query)
         squad_examples = generate_squad_examples(
             question=query,
             best_idx_scores=best_idx_scores,
@@ -188,7 +188,7 @@ class QAPipeline(BaseEstimator):
             retriever_score_weight=retriever_score_weight,
             return_all_preds=return_all_preds,
         )
-        return prediction
+        return prediction, best_idx_scores.values()
 
     def to(self, device):
         """ Send reader to CPU if device=='cpu' or to GPU if device=='cuda'

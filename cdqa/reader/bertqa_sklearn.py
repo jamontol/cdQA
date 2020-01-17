@@ -720,7 +720,7 @@ def write_predictions(
                     best_non_null_entry = entry
 
         probs = _compute_softmax(total_scores)
-        entropia = entropy(probs) #ADD
+        entropia = entropy(probs)
 
         nbest_json = []
         for (i, entry) in enumerate(nbest):
@@ -748,8 +748,6 @@ def write_predictions(
             else:
                 all_predictions[example.qas_id] = best_non_null_entry.text
                 all_nbest_json[example.qas_id] = nbest_json
-
-        #final_entropies[example.qas_id] = entropia #ADD
 
         best_dict = nbest_json[0]
         best_dict["qas_id"] = example.qas_id
