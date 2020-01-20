@@ -14,6 +14,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk import SnowballStemmer
 from scipy.spatial.distance import cosine
+import numpy as np
 
 class BaseRetriever(BaseEstimator, ABC):
     """
@@ -373,7 +374,7 @@ class LSARetriever(BaseRetriever):
   
     def _compute_scores(self, query):
         x_i_tfidf_tsvd = self.tsvd.transform(self.vectorizer.transform([self.process_txt(query, stem=self.do_stem)]))
-        cos_sims = [1 / (1 + cos_dist_i) if not math.isnan(cos_dist_i) else 0 for cos_dist_i in [cosine(x_i_tfidf_tsvd, a_i) for a_i in self.anss_tfidf_tsvd]]
+        cos_sims = [np.array([1 / (1 + cos_dist_i)]) if not math.isnan(cos_dist_i) else np.array([0]) for cos_dist_i in [cosine(x_i_tfidf_tsvd, a_i) for a_i in self.anss_tfidf_tsvd]]
         #tup_i_cos_sims = list(enumerate(cos_sims))
         #self.sorted_tup_i_cos_sims = sorted(tup_i_cos_sims, reverse=True, key=lambda x: x[1])
         #sorted_indices_by_cos_sim = [idx for (idx, cos_sim_i) in self.sorted_tup_i_cos_sims]
