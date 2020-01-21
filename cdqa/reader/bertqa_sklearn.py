@@ -1016,10 +1016,10 @@ class BertProcessor(BaseEstimator, TransformerMixin):
         self.max_query_length = max_query_length
         self.verbose = verbose
 
-        if tokenizer is None:
+        if bert_model == 'bert-base-multilingual-cased':
             self.tokenizer = BertTokenizer.from_pretrained(
                 self.bert_model, do_lower_case=self.do_lower_case)
-        elif tokenizer is 'distilBERT':
+        elif bert_model == 'distilbert-base-multilingual-cased':
             self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
         else:
             self.tokenizer = tokenizer
@@ -1487,7 +1487,14 @@ class BertQA(BaseEstimator):
                 if 'distilbert' not in self.bert_model:
                     inputs['token_type_ids'] = batch[2]
                 example_indices = batch[3]
-                batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
+
+                if self.bert_model == 'distilbert-base-multilingual-cased':
+
+                    batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
+
+                elif self.bert_model == 'bert-base-multilingual-cased':
+
+                    batch_start_logits, batch_end_logits = self.model(**inputs) 
 
             for i, example_index in enumerate(example_indices):
                 start_logits = batch_start_logits[i].detach().cpu().tolist()

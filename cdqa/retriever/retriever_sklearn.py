@@ -7,6 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.base import BaseEstimator
 from .vectorizers import BM25Vectorizer
+from transformers import DistilBertTokenizer
 
 import re
 import math
@@ -283,7 +284,7 @@ class BM25Retriever(BaseRetriever):
 
     def __init__(
         self,
-        lowercase=True,
+        lowercase=False,
         preprocessor=None,
         tokenizer=None,
         stop_words=None,
@@ -311,6 +312,9 @@ class BM25Retriever(BaseRetriever):
         self.k1 = k1
         self.b = b
         self.floor = floor
+
+       
+
 
         vectorizer = BM25Vectorizer(
             lowercase=self.lowercase,
