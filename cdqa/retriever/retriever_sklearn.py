@@ -162,7 +162,7 @@ class TfidfRetriever(BaseRetriever):
 
     def __init__(
         self,
-        lowercase=True,
+        lowercase=False,
         preprocessor=None,
         tokenizer=None,
         stop_words=None,
@@ -349,7 +349,7 @@ class LSARetriever(BaseRetriever):
     # We should also try lancaster lemmatizer since it is a more aggresive
     # stemming and word-level tfidf could benefit more from it
   
-    def __init__(self, top_n=20, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=0):
+    def __init__(self, top_n=20, analyzer='word', ngram_range=(1,3), n_components=120, do_stem=True, verbose=False):
 
         self.stemmer = SnowballStemmer('spanish')
         self.stopwords = stopwords.words('spanish')
