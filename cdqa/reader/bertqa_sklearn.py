@@ -45,6 +45,11 @@ from transformers.tokenization_bert import BasicTokenizer, whitespace_tokenize
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
+import timeit
+import psutil
+from memory_profiler import memory_usage
+
+
 if sys.version_info[0] == 2:
     import cPickle as pickle
 else:
@@ -1019,6 +1024,8 @@ class BertProcessor(BaseEstimator, TransformerMixin):
         if bert_model == 'bert-base-multilingual-cased':
             self.tokenizer = BertTokenizer.from_pretrained(
                 self.bert_model, do_lower_case=self.do_lower_case)
+        elif bert_model == 'bert-base-spanish-wwm-cased':
+            self.tokenizer = AutoTokenizer.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
         elif bert_model == 'distilbert-base-multilingual-cased':
             self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
         else:
@@ -1139,7 +1146,7 @@ class BertQA(BaseEstimator):
         self,
         bert_model="bert-base-uncased",
         train_batch_size=32,
-        predict_batch_size=8,
+        predict_batch_size=1,
         learning_rate=5e-5,
         num_train_epochs=3.0,
         warmup_proportion=0.1,
@@ -1197,6 +1204,10 @@ class BertQA(BaseEstimator):
                     "distributed_{}".format(self.local_rank),
                 ),
             )
+
+        elif (self.bert_model == 'bert-base-spanish-wwm-cased'):
+
+            self.model = AutoModelWithLMHead.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
 
         elif (self.bert_model == 'distilbert-base-multilingual-cased'):
 
@@ -1476,6 +1487,11 @@ class BertQA(BaseEstimator):
         all_results = []
         if self.verbose_logging:
             logger.info("Start evaluating")
+
+        lista_tiempo=[]
+        lista_memoria=[]
+        lista_cpu=[]
+
         for batch in eval_dataloader:
             if len(all_results) % 1000 == 0 and self.verbose_logging:
                 logger.info("Processing example: %d" % (len(all_results)))
@@ -1489,12 +1505,51 @@ class BertQA(BaseEstimator):
                 example_indices = batch[3]
 
                 if self.bert_model == 'distilbert-base-multilingual-cased':
+                    
+                    def respuesta_distilBERT(): #ADD
+                        batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
+                        return batch_start_logits, batch_end_logits, hidden #ADD
 
-                    batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
+                    ### Profiling ###
+                    timer = timeit.Timer(respuesta_distilBERT)
+                    lista_tiempo.append(timer.timeit(number=1))
+
+                    respuesta_distilBERT()
+                    myProcess = psutil.Process(os.getpid())
+                    lista_memoria.append(myProcess.memory_percent())
+                    lista_cpu.append(myProcess.cpu_percent(interval=1))
+
+                    #mem=memory_usage(respuesta_distilBERT)
+                    
+                    pass
+
+                    ##################
 
                 elif self.bert_model == 'bert-base-multilingual-cased':
+                     
+                    def respuesta_BERT():
+                        batch_start_logits, batch_end_logits = self.model(**inputs) 
+                        return batch_start_logits, batch_end_logits
 
-                    batch_start_logits, batch_end_logits = self.model(**inputs) 
+                    ### Profiling ###
+                    timer = timeit.Timer(respuesta_BERT)
+                    lista_tiempo.append(timer.timeit(number=1))
+
+                    respuesta_BERT()
+                    myProcess = psutil.Process(os.getpid())
+                    lista_memoria.append(myProcess.memory_percent())
+                    lista_cpu.append(myProcess.cpu_percent(interval=1))
+
+                    #mem=memory_usage(respuesta_BERT)
+
+                    
+                    pass
+
+                    ##################
+                    # timer = timeit.Timer(respuesta_BERT)
+                    # tiempo = timer.timeit(number=1) #https://stackoverflow.com/questions/24812253/how-can-i-capture-return-value-with-python-timeit-module
+
+                continue
 
             for i, example_index in enumerate(example_indices):
                 start_logits = batch_start_logits[i].detach().cpu().tolist()
@@ -1508,6 +1563,13 @@ class BertQA(BaseEstimator):
                         end_logits=end_logits,
                     )
                 )
+
+        tiempo = np.mean(lista_tiempo) #ADD
+        memoria = np.mean(lista_memoria) #ADD
+        cpu = np.mean(lista_cpu) #ADD
+
+        return tiempo, memoria, cpu #ADD
+
         if self.output_dir:
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
