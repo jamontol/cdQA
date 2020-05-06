@@ -1562,12 +1562,13 @@ class BertQA(BaseEstimator):
                         end_logits=end_logits,
                     )
                 )
-
+        '''
         tiempo = np.mean(lista_tiempo) #ADD
         memoria = np.mean(lista_memoria) #ADD
         cpu = np.mean(lista_cpu) #ADD
 
         return tiempo, memoria, cpu #ADD
+        '''
 
         if self.output_dir:
             if not os.path.exists(self.output_dir):
