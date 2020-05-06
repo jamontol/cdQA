@@ -135,6 +135,7 @@ class QAPipeline(BaseEstimator):
         n_predictions: int = None,
         retriever_score_weight: float = 0.35,
         return_all_preds: bool = False,
+        seccion: tuple = None
     ):
         """ Compute prediction of an answer to a question
 
@@ -174,7 +175,12 @@ class QAPipeline(BaseEstimator):
             isinstance(n_predictions, int) or n_predictions is None or n_predictions < 1
         ):
             raise TypeError("n_predictions should be a positive Integer or None")
-        best_idx_scores= self.retriever.predict(query)
+        
+        if (seccion == None):
+            best_idx_scores = self.retriever.predict(query)
+        else:
+            best_idx_scores = seccion
+
         squad_examples = generate_squad_examples(
             question=query,
             best_idx_scores=best_idx_scores,

@@ -1510,7 +1510,9 @@ class BertQA(BaseEstimator):
                         batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
                         return batch_start_logits, batch_end_logits, hidden #ADD
 
+                    batch_start_logits, batch_end_logits, hidden = respuesta_distilBERT()
                     ### Profiling ###
+                    '''
                     timer = timeit.Timer(respuesta_distilBERT)
                     lista_tiempo.append(timer.timeit(number=1))
 
@@ -1518,20 +1520,22 @@ class BertQA(BaseEstimator):
                     myProcess = psutil.Process(os.getpid())
                     lista_memoria.append(myProcess.memory_percent())
                     lista_cpu.append(myProcess.cpu_percent(interval=1))
-
                     #mem=memory_usage(respuesta_distilBERT)
-                    
-                    pass
+
+                    '''
 
                     ##################
 
-                elif self.bert_model == 'bert-base-multilingual-cased':
+                elif self.bert_model == 'bert-base-multilingual-cased' or self.bert_model == 'bert-base-spanish-wwm-cased' :
                      
                     def respuesta_BERT():
                         batch_start_logits, batch_end_logits = self.model(**inputs) 
                         return batch_start_logits, batch_end_logits
-
+                    
+                    batch_start_logits, batch_end_logits = respuesta_BERT()
+                    
                     ### Profiling ###
+                    '''
                     timer = timeit.Timer(respuesta_BERT)
                     lista_tiempo.append(timer.timeit(number=1))
 
@@ -1539,17 +1543,12 @@ class BertQA(BaseEstimator):
                     myProcess = psutil.Process(os.getpid())
                     lista_memoria.append(myProcess.memory_percent())
                     lista_cpu.append(myProcess.cpu_percent(interval=1))
-
                     #mem=memory_usage(respuesta_BERT)
-
-                    
                     pass
-
-                    ##################
+                    
                     # timer = timeit.Timer(respuesta_BERT)
                     # tiempo = timer.timeit(number=1) #https://stackoverflow.com/questions/24812253/how-can-i-capture-return-value-with-python-timeit-module
-
-                continue
+                    '''
 
             for i, example_index in enumerate(example_indices):
                 start_logits = batch_start_logits[i].detach().cpu().tolist()
