@@ -144,7 +144,9 @@ def evaluate_reader(cdqa_pipeline, dataset_file, expected_version="1.1"):
     preds = reader.predict((examples, features), return_all_preds=True)
     all_predictions = {d['qas_id']: d['text'] for d in preds}
 
-    return evaluate(dataset, all_predictions)
+    return dataset, all_predictions
+
+    #return evaluate(dataset, all_predictions)
 
 
 def evaluate_pipeline(
