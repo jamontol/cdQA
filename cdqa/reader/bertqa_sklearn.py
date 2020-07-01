@@ -1195,7 +1195,7 @@ class BertQA(BaseEstimator):
 
         # Prepare model
 
-        if (self.bert_model == 'bert-base-multilingual-cased'):
+        if ('bert-base' in self.bert_model):
 
             self.model = BertForQuestionAnswering.from_pretrained(
                 self.bert_model,
@@ -1205,9 +1205,9 @@ class BertQA(BaseEstimator):
                 ),
             )
 
-        elif (self.bert_model == 'bert-base-spanish-wwm-cased'):
+        # elif (self.bert_model == 'bert-base-spanish-wwm-cased'):
 
-            self.model = AutoModelWithLMHead.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
+        #     self.model = AutoModelWithLMHead.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
 
         elif (self.bert_model == 'distilbert-base-multilingual-cased'):
 

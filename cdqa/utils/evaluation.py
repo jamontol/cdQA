@@ -57,7 +57,6 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
         scores_for_ground_truths.append(score)
     return max(scores_for_ground_truths)
 
-
 def evaluate(dataset, predictions, unique_pred=True):
     f1 = exact_match = total = 0
     for article in dataset:
@@ -145,7 +144,6 @@ def evaluate_reader(cdqa_pipeline, dataset_file, expected_version="1.1"):
     all_predictions = {d['qas_id']: d['text'] for d in preds}
 
     return dataset, all_predictions
-
     #return evaluate(dataset, all_predictions)
 
 
