@@ -1021,11 +1021,11 @@ class BertProcessor(BaseEstimator, TransformerMixin):
         self.max_query_length = max_query_length
         self.verbose = verbose
 
-        if bert_model == 'bert-base-multilingual-cased':
+        if 'bert-base' in bert_model: #== 'bert-base-multilingual-cased':
             self.tokenizer = BertTokenizer.from_pretrained(
                 self.bert_model, do_lower_case=self.do_lower_case)
-        elif bert_model == 'bert-base-spanish-wwm-cased':
-            self.tokenizer = AutoTokenizer.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
+        # elif bert_model == 'bert-base-spanish-wwm-cased':
+        #     self.tokenizer = AutoTokenizer.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
         elif bert_model == 'distilbert-base-multilingual-cased':
             self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
         else:
