@@ -1021,13 +1021,14 @@ class BertProcessor(BaseEstimator, TransformerMixin):
         self.max_query_length = max_query_length
         self.verbose = verbose
 
-        if 'bert-base' in bert_model: #== 'bert-base-multilingual-cased':
+        if 'distilbert' in bert_model: # == 'distilbert-base-multilingual-cased':
+            self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
+
+        elif 'bert-base' in bert_model: #== 'bert-base-multilingual-cased':
             self.tokenizer = BertTokenizer.from_pretrained(
                 self.bert_model, do_lower_case=self.do_lower_case)
         # elif bert_model == 'bert-base-spanish-wwm-cased':
         #     self.tokenizer = AutoTokenizer.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
-        elif bert_model == 'distilbert-base-multilingual-cased':
-            self.tokenizer = DistilBertTokenizer.from_pretrained(self.bert_model,  do_lower_case=self.do_lower_case)
         else:
             self.tokenizer = tokenizer
             logger.info("loading custom tokenizer")
@@ -1195,7 +1196,17 @@ class BertQA(BaseEstimator):
 
         # Prepare model
 
-        if ('bert-base' in self.bert_model):
+        if ('distilbert-base' in self.bert_model): #== 'distilbert-base-multilingual-cased'):
+
+            self.model = DistilBertForQuestionAnswering.from_pretrained(
+                self.bert_model,
+                cache_dir=os.path.join(
+                    str(PYTORCH_PRETRAINED_BERT_CACHE),
+                    "distributed_{}".format(self.local_rank),
+                ),
+            )
+
+        elif ('bert-base' in self.bert_model):
 
             self.model = BertForQuestionAnswering.from_pretrained(
                 self.bert_model,
@@ -1208,17 +1219,6 @@ class BertQA(BaseEstimator):
         # elif (self.bert_model == 'bert-base-spanish-wwm-cased'):
 
         #     self.model = AutoModelWithLMHead.from_pretrained("dccuchile/bert-base-spanish-wwm-cased")
-
-        elif (self.bert_model == 'distilbert-base-multilingual-cased'):
-
-            self.model = DistilBertForQuestionAnswering.from_pretrained(
-                self.bert_model,
-                cache_dir=os.path.join(
-                    str(PYTORCH_PRETRAINED_BERT_CACHE),
-                    "distributed_{}".format(self.local_rank),
-                ),
-            )
-
 
         if self.server_ip and self.server_port:
             # Distant debugging - see https://code.visualstudio.com/docs/python/debugging#_attach-to-a-local-script
@@ -1504,7 +1504,7 @@ class BertQA(BaseEstimator):
                     inputs['token_type_ids'] = batch[2]
                 example_indices = batch[3]
 
-                if self.bert_model == 'distilbert-base-multilingual-cased':
+                if 'distilbert' in self.bert_model: # == 'distilbert-base-multilingual-cased':
                     
                     def respuesta_distilBERT(): #ADD
                         batch_start_logits, batch_end_logits, hidden = self.model(**inputs) #ADD se devuelve el attention o hidden como 3er parametro?
