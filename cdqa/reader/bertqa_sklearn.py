@@ -1526,7 +1526,7 @@ class BertQA(BaseEstimator):
 
                     ##################
 
-                elif self.bert_model == 'bert-base-multilingual-cased' or self.bert_model == 'bert-base-spanish-wwm-cased' :
+                elif 'bert-base' in self.bert_model:
                      
                     def respuesta_BERT():
                         batch_start_logits, batch_end_logits = self.model(**inputs) 
