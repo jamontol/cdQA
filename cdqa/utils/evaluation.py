@@ -45,6 +45,26 @@ def f1_score(prediction, ground_truth):
     f1 = (2 * precision * recall) / (precision + recall)
     return f1
 
+def prec_score(prediction, ground_truth):
+    prediction_tokens = normalize_answer(prediction).split()
+    ground_truth_tokens = normalize_answer(ground_truth).split()
+    common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
+    num_same = sum(common.values())
+    if num_same == 0:
+        return 0
+    precision = 1.0 * num_same / len(prediction_tokens)
+    return precision
+
+def rec_score(prediction, ground_truth):
+    prediction_tokens = normalize_answer(prediction).split()
+    ground_truth_tokens = normalize_answer(ground_truth).split()
+    common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
+    num_same = sum(common.values())
+    if num_same == 0:
+        return 0
+    recall = 1.0 * num_same / len(ground_truth_tokens)
+
+    return recall
 
 def exact_match_score(prediction, ground_truth):
     return normalize_answer(prediction) == normalize_answer(ground_truth)
@@ -97,13 +117,35 @@ def evaluate(dataset, predictions, unique_pred=True):
                         ]
                     )
 
+                    increm_prec = max(
+                        [
+                            metric_max_over_ground_truths(
+                                prec_score, prediction, ground_truths
+                            )
+                            for prediction in preds
+                        ]
+                    )
+
+                    increm_rec = max(
+                        [
+                            metric_max_over_ground_truths(
+                                rec_score, prediction, ground_truths
+                            )
+                            for prediction in preds
+                        ]
+                    )
+
                 exact_match += increm_em
                 f1 += increm_f1
+                precision += increm_prec
+                recall += increm_rec
 
     exact_match = 100.0 * exact_match / total
     f1 = 100.0 * f1 / total
+    precision = 100.0 * precision / total
+    recall = 100.0 * recall / total
 
-    return {"exact_match": exact_match, "f1": f1}
+    return {"exact_match": exact_match, "f1": f1, "precision": precision, "recall": recall }
 
 
 def evaluate_reader(cdqa_pipeline, dataset_file, expected_version="1.1"):
@@ -123,7 +165,7 @@ def evaluate_reader(cdqa_pipeline, dataset_file, expected_version="1.1"):
     A dictionary with exact match and f1 scores
     """
 
-    with open(dataset_file, "r") as dataset_file:
+    with open(dataset_file,  "r", encoding="utf8",) as dataset_file:
         dataset_json = json.load(dataset_file)
         if dataset_json["version"] != expected_version:
             print(
