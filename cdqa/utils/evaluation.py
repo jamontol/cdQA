@@ -98,6 +98,12 @@ def evaluate(dataset, predictions, unique_pred=True):
                     increm_f1 = metric_max_over_ground_truths(
                         f1_score, prediction, ground_truths
                     )
+                    increm_prec = metric_max_over_ground_truths(
+                        prec_score, prediction, ground_truths
+                    )
+                    increm_rec = metric_max_over_ground_truths(
+                        rec_score, prediction, ground_truths
+                    )
                 else:
                     preds = predictions[qa["id"]]
                     increm_em = max(
