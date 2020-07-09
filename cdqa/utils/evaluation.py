@@ -78,7 +78,7 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
     return max(scores_for_ground_truths)
 
 def evaluate(dataset, predictions, unique_pred=True):
-    f1 = exact_match = total = 0
+    f1 = exact_match = precision = recall = total = 0
     for article in dataset:
         for paragraph in article["paragraphs"]:
             for qa in paragraph["qas"]:
